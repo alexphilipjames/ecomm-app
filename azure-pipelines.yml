@@ -45,43 +45,22 @@ stages:
               ls -la
             displayName: "Check Source Code Location"
 
-      # ----------------------
-      # 🛠 Job 2: Build App
-      # ----------------------
-      - job: BuildJob
-        displayName: "Build FastAPI Application"
-        dependsOn: InfoJob
+      - job: BuildAndDeploy
+        displayName: "Build and Deploy FastAPI Application"
+
         steps:
+          - checkout: none
           - script: |
               cd $BUILD_SOURCESDIRECTORY
-              python3 -m venv venv
-              source venv/bin/activate
-              echo "✅ Virtual environment created"
-            displayName: "Create Virtual Environment"
-
-          - script: |
-              cd $BUILD_SOURCESDIRECTORY
-              source venv/bin/activate
-              pip install --upgrade pip
-              pip install -r requirements.txt
-            displayName: "Install Dependencies"
-
-      - job: DeployJob
-        displayName: "Deploy FastAPI Application"
-        dependsOn: BuildJob
-        steps:
-
-          - checkout: self  # 👈 Checkout code again (mandatory in new job
-
-          - script: |
               echo "🛠️ Setting up Python Environment"
               python3 -m venv venv
               source venv/bin/activate
               pip install --upgrade pip
               pip install -r requirements.txt
             displayName: "Setup Virtual Environment & Install Dependencies"
-            
+
           - script: |
+              
               echo "🛑 Killing any running uvicorn processes..."
               pkill -f "uvicorn" && echo "✅ Old process stopped" || echo "⚠️ No process found"
             displayName: "Stop Old Uvicorn (if running)"
