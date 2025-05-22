@@ -35,3 +35,9 @@ stages:
               python --version
             displayName: "Print Agent & python Info"
 
+          - script: |
+              echo "📁 Code Directory: $BUILD_SOURCESDIRECTORY"
+              cd $BUILD_SOURCESDIRECTORY
+              ls -la
+            displayName: "Check Source Code Location"
+
