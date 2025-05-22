@@ -66,23 +66,30 @@ stages:
               pip install -r requirements.txt
             displayName: "Install Dependencies"
 
-      # ----------------------
-      # 🚀 Job 3: Deploy App
-      # ----------------------
       - job: DeployJob
         displayName: "Deploy FastAPI Application"
         dependsOn: BuildJob
         steps:
+
+          - checkout: self  # 👈 Checkout code again (mandatory in new job
+
           - script: |
-              cd $BUILD_SOURCESDIRECTORY
+              echo "🛠️ Setting up Python Environment"
+              python3 -m venv venv
+              source venv/bin/activate
+              pip install --upgrade pip
+              pip install -r requirements.txt
+            displayName: "Setup Virtual Environment & Install Dependencies"
+            
+          - script: |
+              echo "🛑 Killing any running uvicorn processes..."
+              pkill -f "uvicorn" && echo "✅ Old process stopped" || echo "⚠️ No process found"
+            displayName: "Stop Old Uvicorn (if running)"
 
-              echo "🛑 Checking for existing Uvicorn processes..."
-              pkill -f "uvicorn" && echo "✅ Existing process killed" || echo "⚠️ No process found"
-
-              echo "🚀 Starting FastAPI app..."
+          - script: |
+              echo "🚀 Starting FastAPI App..."
               source venv/bin/activate
               nohup uvicorn main:app --host 0.0.0.0 --port 8000 --reload > fastapi.log 2>&1 &
-
               sleep 3
               pgrep -f "uvicorn" > /dev/null
               if [ $? -ne 0 ]; then
@@ -92,9 +99,10 @@ stages:
               else
                 echo "✅ FastAPI app is running"
               fi
-            displayName: "Kill Old Process & Start New FastAPI App"
+            displayName: "Start FastAPI App"
 
           - script: |
-              echo "📜 Last 30 lines of FastAPI Logs:"
-              tail -n 30 $BUILD_SOURCESDIRECTORY/fastapi.log
-            displayName: "Show FastAPI Log Output"
+              echo "📜 Showing FastAPI Logs:"
+              tail -n 30 fastapi.log
+            displayName: "Show Log Output"
+
