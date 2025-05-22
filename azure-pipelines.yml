@@ -28,7 +28,6 @@ stages:
       - job: RunOnSelfHostedAgent
         displayName: "Run on cr-runner"
         steps:
-
           - script: |
               echo "🔍 Agent Name: $(Agent.Name)"
               echo "💻 Machine Name: $(Agent.MachineName)"
