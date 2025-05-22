@@ -1,0 +1,38 @@
+# Trigger the pipeline on push to main branch
+trigger:
+  branches:
+    include:
+      - main
+
+# Optional: Trigger on pull requests
+pr:
+  branches:
+    include:
+      - main
+
+# Define the agent pool and pin to your self-hosted runner
+pool:
+  name: cr-runner  # Change if you use a custom pool
+  demands:
+    - agent.name -equals cr-runner
+
+# Pipeline variables
+variables:
+  pythonVersion: '3.10'
+
+# Pipeline Steps
+stages:
+  - stage: Test
+    displayName: "Test"
+    jobs:
+      - job: RunOnSelfHostedAgent
+        displayName: "Run on cr-runner"
+        steps:
+
+          - script: |
+              echo "🔍 Agent Name: $(Agent.Name)"
+              echo "💻 Machine Name: $(Agent.MachineName)"
+              echo "📂 Working Directory: $(System.DefaultWorkingDirectory)"
+              python --version
+            displayName: "Print Agent & python Info"
+
